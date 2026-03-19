@@ -1,7 +1,8 @@
 # 🍿 Popcorn — Intelligent Movie Discovery
 
-A machine learning-powered movie recommender built with **Next.js + TypeScript** (frontend) and **FastAPI** (backend).
-Suggests movies based on content-based filtering, fetches posters from **OMDb API**, and trailers from **TMDB API**.
+Find your next favourite movie. Popcorn recommends films based on what you love — with trailers, ratings, posters, and a personal watchlist, all in one place.
+
+Built with **Next.js + TypeScript** and a content-based ML model trained on 4800+ movies. Posters come from the **OMDb API**, trailers from **TMDB**.
 
 ---
 
