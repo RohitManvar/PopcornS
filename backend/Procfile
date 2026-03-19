@@ -1,0 +1,1 @@
+web: python download_artifacts.py && uvicorn main:app --host 0.0.0.0 --port $PORT

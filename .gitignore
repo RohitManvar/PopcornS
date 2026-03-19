@@ -1,0 +1,21 @@
+# ML artifacts (too large for GitHub — host on Google Drive)
+artificats/similarity.pkl
+
+# Generated data files are committed (small JSON, needed for Vercel deploy)
+# frontend/data/ is intentionally NOT ignored
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# OS
+.DS_Store
+Thumbs.db
