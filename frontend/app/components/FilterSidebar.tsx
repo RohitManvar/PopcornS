@@ -39,7 +39,7 @@ export default function FilterSidebar({
     "w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 focus:outline-none focus:border-amber-500/50";
 
   function exportWatchlist() {
-    const lines = ["# My Popcorn Watchlist", "", ...watchlist.map((t, i) => `${i + 1}. ${t}`)];
+    const lines = ["# My PopcornS Watchlist", "", ...watchlist.map((t, i) => `${i + 1}. ${t}`)];
     const blob = new Blob([lines.join("\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

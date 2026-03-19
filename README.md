@@ -1,6 +1,6 @@
-# 🍿 Popcorn — Intelligent Movie Discovery
+# 🍿 PopcornS — Intelligent Movie Discovery
 
-Find your next favourite movie. Popcorn recommends films based on what you love — with trailers, ratings, posters, and a personal watchlist, all in one place.
+Find your next favourite movie. PopcornS recommends films based on what you love — with trailers, ratings, posters, and a personal watchlist, all in one place.
 
 Built with **Next.js + TypeScript** and a content-based ML model trained on 4800+ movies. Posters come from the **OMDb API**, trailers from **TMDB**.
 

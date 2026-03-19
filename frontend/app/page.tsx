@@ -122,7 +122,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="text-center py-8 px-4">
-        <h1 className="gold-text text-4xl sm:text-5xl font-black tracking-tight mb-2">🍿 Popcorn</h1>
+        <h1 className="gold-text text-4xl sm:text-5xl font-black tracking-tight mb-2">🍿 PopcornS</h1>
         <p className="text-white/40 text-xs sm:text-sm uppercase tracking-[4px]">Intelligent Movie Discovery</p>
       </header>
 
@@ -293,7 +293,7 @@ export default function Home() {
       </div>
 
       <footer className="text-center py-4 text-white/20 text-xs border-t border-white/5">
-        Popcorn · Built with Next.js + FastAPI · TMDB Dataset
+        PopcornS · Built with Next.js + FastAPI · TMDB Dataset
       </footer>
     </div>
   );

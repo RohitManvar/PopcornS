@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from typing import Optional
 from functools import lru_cache
 
-app = FastAPI(title="Popcorn API")
+app = FastAPI(title="PopcornS API")
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
