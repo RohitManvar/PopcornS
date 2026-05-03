@@ -69,7 +69,7 @@ export default function FilterSidebar({
           <span className="text-xl">Filters</span>
         </div>
 
-        <div className="space-y-8 cinematic-blur p-8 rounded-[32px] shadow-2xl">
+        <div className="space-y-8 cinematic-blur p-6 rounded-[32px] shadow-2xl">
           <div>
             <label className={labelCls}>Genre</label>
             <select className={selectCls} value={state.genre} onChange={(e) => onChange({ genre: e.target.value })}>
@@ -116,7 +116,7 @@ export default function FilterSidebar({
         </div>
 
         {/* Options panel */}
-        <div className="space-y-8 cinematic-blur p-8 rounded-[32px] shadow-2xl">
+        <div className="space-y-8 cinematic-blur p-6 rounded-[32px] shadow-2xl">
           <div className="text-[#E6A94A] font-bold text-sm tracking-widest uppercase">System Options</div>
 
           <div>
@@ -142,7 +142,7 @@ export default function FilterSidebar({
 
         {/* Recently Viewed */}
         {recentlyViewed.length > 0 && (
-          <div className="cinematic-blur p-8 rounded-[32px]">
+          <div className="cinematic-blur p-6 rounded-[32px]">
             <div className="flex items-center gap-3 mb-6">
               <Clock size={16} className="text-[#E6A94A]" />
               <div className="text-[#E6A94A] font-bold text-sm tracking-widest uppercase">History</div>
@@ -165,7 +165,7 @@ export default function FilterSidebar({
         )}
 
         {/* Watchlist */}
-        <div className="cinematic-blur p-8 rounded-[32px]">
+        <div className="cinematic-blur p-6 rounded-[32px]">
           <div className="flex items-center justify-between mb-6">
             <div className="text-[#E6A94A] font-bold text-sm tracking-widest uppercase flex items-center gap-2">
               <Bookmark size={14} />
@@ -219,13 +219,13 @@ export default function FilterSidebar({
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:block w-80 lg:w-96 shrink-0 h-fit sticky top-6">
+      <aside className="hidden md:block w-72 lg:w-80 shrink-0 h-fit sticky top-6">
         {content}
       </aside>
 
       {/* Mobile drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-80 max-w-[90vw] bg-[#0F1117] border-r border-[#2A2E3A] overflow-y-auto p-6 transition-transform duration-500 cubic-bezier(0.22, 1, 0.36, 1) md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[90vw] bg-[#0F1117] border-r border-[#2A2E3A] overflow-y-auto p-6 transition-transform duration-500 cubic-bezier(0.22, 1, 0.36, 1) md:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
