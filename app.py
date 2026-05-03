@@ -8,8 +8,8 @@ import ast
 
 # ── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="CineMatch – Movie Recommender",
-    page_icon="🎬",
+    page_title="PopcornS",
+    page_icon="🎞️",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -276,11 +276,11 @@ def recommend(movie: str, movies_df, sim_matrix, meta_df: pd.DataFrame, n: int, 
         meta  = get_meta(title, meta_df)
         results.append({"title": title, "similarity": round(score, 3), **meta})
 
-    if sort_by == "⭐ Rating":
+    if sort_by == "Rating":
         results.sort(key=lambda x: x.get("vote_average", 0), reverse=True)
-    elif sort_by == "🔥 Popularity":
+    elif sort_by == "Popularity":
         results.sort(key=lambda x: x.get("popularity", 0), reverse=True)
-    elif sort_by == "📅 Year (Newest)":
+    elif sort_by == "Year (Newest)":
         results.sort(key=lambda x: x.get("year", 0), reverse=True)
 
     return results
@@ -295,61 +295,65 @@ if "watchlist" not in st.session_state:
     st.session_state.watchlist = []
 
 # ── Header ───────────────────────────────────────────────────────────────────
-st.markdown("<div class='main-title'>🎬 CineMatch</div>", unsafe_allow_html=True)
-st.markdown("<div class='subtitle'>Intelligent Movie Discovery Engine</div>", unsafe_allow_html=True)
+try:
+    st.image("frontend/public/logo.png", width=80)
+except:
+    pass
+st.markdown("<div class='main-title'>PopcornS</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>Smart Recommendations for Watch Better</div>", unsafe_allow_html=True)
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🎛️ Filters")
+    st.markdown("## Filters")
     st.markdown("---")
 
     # Genre filter
     all_genres = sorted({g for genres in meta_df["genres_list"] for g in genres}) if not meta_df.empty else []
-    selected_genres = st.multiselect("🎭 Genres", all_genres, placeholder="All genres")
+    selected_genres = st.multiselect("Genres", all_genres, placeholder="All genres")
 
     st.markdown("")
 
     # Language filter
     all_langs = sorted(meta_df["original_language"].dropna().unique().tolist()) if not meta_df.empty else []
     lang_options = ["All"] + all_langs
-    selected_lang = st.selectbox("🌐 Original Language", lang_options)
+    selected_lang = st.selectbox("Original Language", lang_options)
 
     st.markdown("")
 
     # Year range filter
     min_year = int(meta_df["year"].min()) if not meta_df.empty else 1900
     max_year = int(meta_df["year"].max()) if not meta_df.empty else 2024
-    year_range = st.slider("📅 Release Year", min_year, max_year, (1990, max_year))
+    year_range = st.slider("Release Year", min_year, max_year, (1990, max_year))
 
     st.markdown("")
 
     # Rating filter
-    min_rating = st.slider("⭐ Min Rating (0–10)", 0.0, 10.0, 0.0, step=0.5)
+    min_rating = st.slider("Min Rating (0–10)", 0.0, 10.0, 0.0, step=0.5)
 
     st.markdown("---")
-    st.markdown("## ⚙️ Options")
+    st.markdown("## Options")
 
-    num_recs = st.slider("🔢 Recommendations", 5, 20, 10, step=5)
+    num_recs = st.slider("Recommendations", 5, 20, 10, step=5)
 
     sort_by = st.selectbox(
-        "📊 Sort By",
-        ["🎯 Similarity", "⭐ Rating", "🔥 Popularity", "📅 Year (Newest)"],
+        "Sort By",
+        ["Similarity", "Rating", "Popularity", "Year (Newest)"],
     )
 
     st.markdown("---")
 
     # Watchlist in sidebar
-    st.markdown("## 🍿 My Watchlist")
+    st.markdown("## My Watchlist")
     if st.session_state.watchlist:
         for wm in st.session_state.watchlist:
             col_w1, col_w2 = st.columns([5, 1])
             with col_w1:
-                st.markdown(f"<div class='watchlist-pill'>🎬 {wm}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='watchlist-pill'>{wm}</div>", unsafe_allow_html=True)
             with col_w2:
                 if st.button("✕", key=f"rm_{wm}", help="Remove"):
                     st.session_state.watchlist.remove(wm)
                     st.rerun()
-        if st.button("🗑️ Clear All", use_container_width=True):
+        if st.button("Clear All", use_container_width=True):
             st.session_state.watchlist = []
             st.rerun()
     else:
@@ -380,7 +384,7 @@ if movies_df is not None:
         display_list = all_titles
 
     if not display_list:
-        st.warning("⚠️ No movies match the selected filters. Try widening your criteria.")
+        st.warning("No movies match the selected filters. Try widening your criteria.")
         display_list = all_titles
 
 else:
@@ -396,13 +400,13 @@ with col_search:
     )
 with col_btn:
     st.markdown("<br>", unsafe_allow_html=True)
-    go = st.button("✨ Recommend", use_container_width=True, type="primary")
+    go = st.button("Recommend", use_container_width=True, type="primary")
 
 # ── Movie Detail Panel ────────────────────────────────────────────────────────
 if selected_movie and not meta_df.empty:
     meta = get_meta(selected_movie, meta_df)
     if meta:
-        st.markdown("<div class='section-header'>📋 Selected Movie</div>", unsafe_allow_html=True)
+        st.markdown("<div class='section-header'>Selected Movie</div>", unsafe_allow_html=True)
         with st.container():
             d_col1, d_col2 = st.columns([1, 3])
             with d_col1:
@@ -411,7 +415,7 @@ if selected_movie and not meta_df.empty:
                 if poster:
                     st.image(poster, use_container_width=True)
                 else:
-                    st.markdown("<div class='no-poster'>🎬</div>", unsafe_allow_html=True)
+                    st.markdown("<div class='no-poster'>No Poster</div>", unsafe_allow_html=True)
 
                 # Watchlist toggle
                 in_wl = selected_movie in st.session_state.watchlist
@@ -445,7 +449,7 @@ if selected_movie and not meta_df.empty:
                 <div class='stat-row'>
                     <div class='stat-box'>
                         <span class='stat-label'>Rating</span>
-                        <span class='stat-value'>⭐ {rating}</span>
+                        <span class='stat-value'>{rating}</span>
                     </div>
                     <div class='stat-box'>
                         <span class='stat-label'>Year</span>
@@ -478,7 +482,7 @@ if go:
         st.error("Model artifacts not loaded.")
     else:
         st.markdown(
-            f"<div class='section-header'>🎯 Top {num_recs} Recommendations for <em>{selected_movie}</em></div>",
+            f"<div class='section-header'>Top {num_recs} Recommendations for <em>{selected_movie}</em></div>",
             unsafe_allow_html=True,
         )
         with st.spinner("Finding the best matches…"):
@@ -503,15 +507,15 @@ if go:
 
                     with col:
                         poster_url = fetch_poster(title)
-                        rating_html = f"<span class='rating-badge'>⭐ {rating}</span>" if rating else ""
+                        rating_html = f"<span class='rating-badge'>{rating}</span>" if rating else ""
                         year_html   = f"<span class='year-badge'>{year}</span>" if year and year != 0 else ""
                         genres_html = "".join(f"<span class='genre-badge'>{g}</span>" for g in genres)
-                        sim_html    = f"<span class='year-badge'>🎯 {sim_score}</span>" if sim_score else ""
+                        sim_html    = f"<span class='year-badge'>{sim_score}</span>" if sim_score else ""
 
                         poster_section = (
                             f'<img src="{poster_url}" style="width:100%;border-radius:10px;object-fit:cover;max-height:230px;">'
                             if poster_url
-                            else "<div style='height:180px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:rgba(255,255,255,0.03);border-radius:10px;'>🎬</div>"
+                            else "<div style='height:180px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:rgba(255,255,255,0.03);border-radius:10px;'>No Poster</div>"
                         )
 
                         st.markdown(f"""
@@ -527,7 +531,7 @@ if go:
                         # ── Button row: Info + Watchlist ──
                         btn_c1, btn_c2 = st.columns(2)
                         with btn_c1:
-                            with st.popover("📋 Info", use_container_width=True):
+                            with st.popover("Info", use_container_width=True):
                                 # Fetch full meta for this recommendation
                                 rmeta = get_meta(title, meta_df)
                                 if poster_url:
@@ -544,11 +548,11 @@ if go:
                                 st.markdown(f"""
 | Field | Value |
 |-------|-------|
-| ⭐ Rating | **{r_rating} / 10** |
-| 📅 Year | {r_year} |
-| ⏱ Runtime | {int(r_runtime) if str(r_runtime).replace('.','').isdigit() else '—'} min |
-| 🌐 Language | {r_lang} |
-| 🎯 Similarity | {sim_score} |
+| Rating | **{r_rating} / 10** |
+| Year | {r_year} |
+| Runtime | {int(r_runtime) if str(r_runtime).replace('.','').isdigit() else '—'} min |
+| Language | {r_lang} |
+| Similarity | {sim_score} |
                                 """)
                                 overview = rmeta.get("overview", "")
                                 if overview:

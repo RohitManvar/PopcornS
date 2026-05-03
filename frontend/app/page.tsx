@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, SlidersHorizontal, Shuffle, Flame } from "lucide-react";
+import Image from "next/image";
+import { Sparkles, SlidersHorizontal, Shuffle, Flame, ArrowRight, Clapperboard, Film } from "lucide-react";
 import SearchBar from "./components/SearchBar";
 import FilterSidebar from "./components/FilterSidebar";
 import type { RecentlyViewedItem } from "./components/FilterSidebar";
@@ -11,7 +12,6 @@ import MovieCard from "./components/MovieCard";
 import MovieCardSkeleton from "./components/MovieCardSkeleton";
 import { fetchFilters, fetchMovies, fetchMovie, fetchTrending } from "./lib/api";
 import type { FilterState, Movie } from "./types";
-import Image from "next/image";
 import Link from "next/link";
 import { Star, Calendar, Clock, Globe, Bookmark, BookmarkCheck } from "lucide-react";
 import { useToast } from "./components/Toast";
@@ -38,7 +38,6 @@ export default function Home() {
   const searchRef = useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
 
-  // Load persisted data
   useEffect(() => {
     const saved = localStorage.getItem("cinematic-watchlist");
     if (saved) setWatchlist(JSON.parse(saved));
@@ -50,14 +49,12 @@ export default function Home() {
     localStorage.setItem("cinematic-watchlist", JSON.stringify(watchlist));
   }, [watchlist]);
 
-  // Read genre from URL param on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const genre = params.get("genre");
     if (genre) setFilters((f) => ({ ...f, genre }));
   }, []);
 
-  // Global keyboard shortcut: / to focus search
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (
@@ -96,7 +93,7 @@ export default function Home() {
     placeholderData: (prev) => prev,
   });
 
-  const { data: movieDetail } = useQuery<Movie>({
+  const { data: movieDetail, isLoading: movieLoading } = useQuery<Movie>({
     queryKey: ["movie", selectedMovie],
     queryFn: () => fetchMovie(selectedMovie),
     enabled: !!selectedMovie,
@@ -115,30 +112,46 @@ export default function Home() {
     const pick = movieList[Math.floor(Math.random() * movieList.length)];
     setSelectedMovie(pick);
     setRecommending(true);
-    showToast(`🎲 Picked "${pick}" for you!`, "info");
+    showToast(`Picked "${pick}" for you!`, "info");
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative overflow-x-hidden">
+      {/* Cinematic Depth Highlights */}
+      <div className="fixed top-[10%] left-[10%] w-[35%] h-[35%] rounded-full bg-[#E6A94A]/[0.05] blur-[120px] pointer-events-none z-0" />
+      <div className="fixed bottom-[10%] right-[10%] w-[35%] h-[35%] rounded-full bg-[#6366F1]/[0.04] blur-[120px] pointer-events-none z-0" />
+
       {/* Header */}
-      <header className="text-center py-8 px-4">
-        <h1 className="gold-text text-4xl sm:text-5xl font-black tracking-tight mb-2">🍿 PopcornS</h1>
-        <p className="text-white/40 text-xs sm:text-sm uppercase tracking-[4px]">Intelligent Movie Discovery</p>
+      <header className="py-16 sm:py-24 px-8 sm:px-12 relative z-10">
+        <div className="max-w-screen-2xl mx-auto w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="gold-text text-5xl sm:text-8xl font-black tracking-tighter leading-none flex items-center gap-3">
+              <div className="relative w-12 h-12 sm:w-20 sm:h-20 shrink-0">
+                <Image src="/logo.png" alt="PopcornS Logo" fill className="object-contain" />
+              </div>
+              PopcornS
+            </h1>
+            <p className="text-[#F5F3EE]/30 text-[10px] sm:text-xs uppercase tracking-[4px] sm:tracking-[8px] font-bold">
+              Smart Recommendations for Watch Better
+            </p>
+          </div>
+          
+        </div>
       </header>
 
       {/* Mobile filter button */}
-      <div className="md:hidden px-4 mb-4">
+      <div className="md:hidden px-6 mb-6">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/70 text-sm hover:bg-white/10 transition-colors"
+          className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#171923] border border-[#2A2E3A] text-[#F5F3EE]/70 text-sm font-bold shadow-xl transition-all active:scale-95"
         >
-          <SlidersHorizontal size={16} />
-          Filters & Options
+          <SlidersHorizontal size={18} />
+          Filters & Exploration
         </button>
       </div>
 
       {/* Main layout */}
-      <div className="flex-1 flex gap-6 px-4 sm:px-6 pb-10 max-w-screen-2xl mx-auto w-full">
+      <div className="flex-1 flex flex-col md:flex-row gap-12 px-6 sm:px-10 pb-20 max-w-screen-2xl mx-auto w-full">
         <FilterSidebar
           filters={filterData}
           state={filters}
@@ -152,9 +165,9 @@ export default function Home() {
         />
 
         {/* Content */}
-        <div className="flex-1 min-w-0 space-y-6">
+        <div className="flex-1 min-w-0 space-y-16">
           {/* Search + Buttons */}
-          <div className="flex gap-2 sm:gap-3 items-stretch">
+          <div className="flex flex-col sm:flex-row gap-6 items-stretch">
             <SearchBar
               ref={searchRef}
               movies={movieList}
@@ -162,60 +175,72 @@ export default function Home() {
               onChange={setSelectedMovie}
               onSearch={setSelectedMovie}
             />
-            <button
-              onClick={surpriseMe}
-              title="Surprise me"
-              className="flex items-center gap-2 px-3 sm:px-4 py-3.5 bg-white/5 border border-white/10 text-white/70 rounded-xl text-sm hover:bg-white/10 hover:text-amber-400 transition-all shrink-0"
-            >
-              <Shuffle size={16} />
-            </button>
-            <button
-              onClick={() => setRecommending(true)}
-              disabled={!selectedMovie}
-              className="flex items-center gap-2 px-4 sm:px-6 py-3.5 bg-gradient-to-r from-orange-500 to-amber-400 text-black font-bold rounded-xl text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:brightness-110 transition-all shrink-0"
-            >
-              <Sparkles size={16} />
-              <span className="hidden sm:inline">Recommend</span>
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={surpriseMe}
+                title="Surprise me"
+                className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 cinematic-blur text-[#E6A94A] rounded-2xl transition-all hover:bg-white/10 active:scale-95 shrink-0 shadow-xl group"
+              >
+                <Shuffle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+              </button>
+              <button
+                onClick={() => setRecommending(true)}
+                disabled={!selectedMovie}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-10 bg-[#E6A94A] text-[#0F1117] font-black rounded-2xl text-base disabled:opacity-10 disabled:grayscale transition-all hover:brightness-110 active:scale-95 shadow-[0_15px_45px_rgba(230,169,74,0.25)] glow-primary"
+              >
+                <Sparkles size={20} />
+                Discover Matches
+              </button>
+            </div>
           </div>
 
           {/* Selected movie detail panel */}
           {movieDetail && (
-            <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
-                <div className="relative w-24 sm:w-32 shrink-0 aspect-[2/3] rounded-xl overflow-hidden bg-white/5 mx-auto sm:mx-0">
+            <div className="cinematic-blur rounded-[48px] p-8 sm:p-14 shadow-[0_35px_120px_rgba(0,0,0,0.6)] relative overflow-hidden group">
+              {/* Subtle background glow */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#E6A94A]/[0.05] blur-[100px] pointer-events-none" />
+              
+              <div className="flex flex-col md:flex-row gap-10 sm:gap-16 relative z-10">
+                <div className="relative w-40 sm:w-56 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 mx-auto md:mx-0">
                   {movieDetail.poster ? (
-                    <Image src={movieDetail.poster} alt={movieDetail.title} fill className="object-cover" sizes="128px" />
+                    <Image src={movieDetail.poster} alt={movieDetail.title} fill className="object-cover" sizes="224px" />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-3xl text-white/20">🎬</div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#1A1C26]">
+                      <Film size={48} className="text-white/5" />
+                    </div>
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <Link href={`/movie/${encodeURIComponent(movieDetail.title)}`} className="text-lg sm:text-2xl font-bold text-white hover:text-amber-400 transition-colors">
-                      {movieDetail.title}
-                    </Link>
+                <div className="flex-1 min-w-0 space-y-6">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <Link href={`/movie/${encodeURIComponent(movieDetail.title)}`} className="text-3xl sm:text-5xl font-black text-[#F5F3EE] hover:text-[#E6A94A] transition-colors leading-none tracking-tight">
+                        {movieDetail.title}
+                      </Link>
+                      <p className="text-[#F5F3EE]/40 text-sm font-medium tracking-wide">
+                        {movieDetail.year} • {movieDetail.original_language?.toUpperCase()} • {movieDetail.runtime} min
+                      </p>
+                    </div>
                     <button
                       onClick={() => toggleWatchlist(movieDetail.title)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-all ${
+                      className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold shrink-0 transition-all ${
                         watchlist.includes(movieDetail.title)
-                          ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                          : "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10"
+                          ? "bg-[#E6A94A] text-[#0F1117] shadow-lg"
+                          : "bg-white/5 text-[#F5F3EE]/70 border border-white/10 hover:bg-white/10"
                       }`}
                     >
-                      {watchlist.includes(movieDetail.title) ? <BookmarkCheck size={12} /> : <Bookmark size={12} />}
-                      {watchlist.includes(movieDetail.title) ? "Saved" : "Save"}
+                      {watchlist.includes(movieDetail.title) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                      {watchlist.includes(movieDetail.title) ? "Saved" : "Save for later"}
                     </button>
                   </div>
 
                   {movieDetail.genres?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-3">
+                    <div className="flex flex-wrap gap-2">
                       {movieDetail.genres.map((g) => (
                         <button
                           key={g}
                           onClick={() => setFilters((f) => ({ ...f, genre: g }))}
-                          className="text-xs px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/25 transition-colors"
+                          className="text-[10px] sm:text-xs font-bold px-4 py-1.5 rounded-full bg-[#E6A94A]/10 text-[#E6A94A] border border-[#E6A94A]/20 hover:bg-[#E6A94A]/20 transition-all uppercase tracking-wider"
                         >
                           {g}
                         </button>
@@ -223,33 +248,37 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="flex flex-wrap gap-3 mb-3">
-                    {movieDetail.vote_average > 0 && (
-                      <div className="flex items-center gap-1.5 text-sm text-white/70">
-                        <Star size={14} className="text-amber-400" fill="currentColor" />
-                        <span><strong className="text-amber-400">{movieDetail.vote_average.toFixed(1)}</strong>/10</span>
-                      </div>
-                    )}
-                    {movieDetail.year > 0 && (
-                      <div className="flex items-center gap-1.5 text-sm text-white/70">
-                        <Calendar size={14} className="text-white/40" /> {movieDetail.year}
-                      </div>
-                    )}
-                    {movieDetail.runtime && (
-                      <div className="flex items-center gap-1.5 text-sm text-white/70">
-                        <Clock size={14} className="text-white/40" /> {movieDetail.runtime} min
-                      </div>
-                    )}
-                    {movieDetail.original_language && (
-                      <div className="flex items-center gap-1.5 text-sm text-white/70">
-                        <Globe size={14} className="text-white/40" /> {movieDetail.original_language.toUpperCase()}
-                      </div>
-                    )}
+                  <div className="flex items-center gap-8 py-4 border-y border-[#2A2E3A]/30">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-widest mb-1">Critics Rating</span>
+                       <div className="flex items-center gap-2">
+                         <Star size={20} className="text-[#E6A94A]" fill="currentColor" />
+                         <span className="text-2xl font-black text-[#F5F3EE]">{movieDetail.vote_average.toFixed(1)}</span>
+                         <span className="text-[#F5F3EE]/30 font-bold text-sm">/ 10</span>
+                       </div>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-widest mb-1">Popularity</span>
+                       <div className="flex items-center gap-2 text-2xl font-black text-[#F5F3EE]">
+                         {Math.round(movieDetail.popularity)}
+                         <Flame size={18} className="text-[#E6A94A]" />
+                       </div>
+                    </div>
                   </div>
 
                   {movieDetail.overview && (
-                    <p className="text-white/50 text-sm leading-relaxed line-clamp-3">{movieDetail.overview}</p>
+                    <p className="text-[#F5F3EE]/60 text-base sm:text-lg leading-relaxed line-clamp-4 font-medium italic">
+                      "{movieDetail.overview}"
+                    </p>
                   )}
+                  
+                  <Link 
+                    href={`/movie/${encodeURIComponent(movieDetail.title)}`}
+                    className="inline-flex items-center gap-2 text-[#E6A94A] font-bold hover:underline group"
+                  >
+                    View full production details
+                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -266,15 +295,21 @@ export default function Home() {
             />
           )}
 
-          {/* Trending (shown when nothing selected) */}
+          {/* Trending Section */}
           {!selectedMovie && !recommending && (
-            <section>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-1 h-7 rounded-full bg-orange-500" />
-                <Flame size={18} className="text-orange-400" />
-                <h2 className="text-xl font-bold text-white">Trending Now</h2>
+            <section className="space-y-10">
+              <div className="flex items-end justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <Flame size={24} className="text-[#E6A94A]" />
+                    <h2 className="text-3xl sm:text-5xl font-black text-[#F5F3EE] tracking-tight">Trending Now</h2>
+                  </div>
+                  <p className="text-[#F5F3EE]/30 font-bold uppercase text-[10px] tracking-[4px]">The most talked about films this week</p>
+                </div>
+                <div className="hidden sm:block w-32 h-px bg-gradient-to-r from-transparent to-[#2A2E3A]" />
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-10">
                 {trendingLoading
                   ? Array.from({ length: 10 }).map((_, i) => <MovieCardSkeleton key={i} />)
                   : trendingData?.movies.map((movie) => (
@@ -292,8 +327,19 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="text-center py-4 text-white/20 text-xs border-t border-white/5">
-        PopcornS · Built with Next.js + FastAPI · TMDB Dataset
+      <footer className="py-12 px-10 border-t border-[#2A2E3A]/50 mt-20">
+        <div className="max-w-screen-2xl mx-auto w-full flex flex-col md:flex-row justify-between items-center gap-8">
+             <span className="text-[#E6A94A] font-black text-2xl tracking-tighter flex items-center gap-2">
+               <div className="relative w-7 h-7 shrink-0">
+                 <Image src="/logo.png" alt="PopcornS" fill className="object-contain" />
+               </div>
+               PopcornS
+             </span>
+             <span className="text-[#F5F3EE]/20 text-[10px] uppercase font-bold tracking-[4px]">Smart Recommendations</span>
+             <div className="text-[#F5F3EE]/20 text-[10px] uppercase font-bold tracking-[2px] text-center md:text-right">
+               Built for cinema enthusiasts · Data powered by TMDB & OMDb · © 2024
+             </div>
+        </div>
       </footer>
     </div>
   );

@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft, Star, Calendar, Clock, Globe,
-  Bookmark, BookmarkCheck, Loader2, Share2, Play,
+  Bookmark, BookmarkCheck, Loader2, Share2, Play, Flame, Info, Film
 } from "lucide-react";
 import { fetchMovie, fetchRecommendations, fetchTrailer } from "../../lib/api";
 import MovieCard from "../../components/MovieCard";
@@ -54,7 +54,13 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
     enabled: !!movie,
   });
 
-  // Track recently viewed when movie loads
+  useEffect(() => {
+    if (movie?.title) {
+      document.title = `${movie.title} | PopcornS`;
+    }
+    return () => { document.title = "PopcornS"; };
+  }, [movie]);
+
   useEffect(() => {
     if (!movie) return;
     const raw = localStorage.getItem(RECENTLY_VIEWED_KEY);
@@ -73,10 +79,10 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
         setTrailerUrl(data.trailer);
         setShowTrailer(true);
       } else {
-        showToast("No trailer found for this movie", "info");
+        showToast("No trailer found for this masterpiece", "info");
       }
     } catch {
-      showToast("Failed to load trailer", "error");
+      showToast("Could not reach the trailer server", "error");
     } finally {
       setTrailerLoading(false);
     }
@@ -86,7 +92,7 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
     const url = window.location.href;
     try {
       await navigator.clipboard.writeText(url);
-      showToast("Link copied to clipboard!", "success");
+      showToast("Production link copied!", "success");
     } catch {
       showToast("Could not copy link", "error");
     }
@@ -94,18 +100,23 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center gap-3 text-white/40">
-        <Loader2 size={24} className="animate-spin text-amber-400" />
-        Loading movie…
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-[#0F1117]">
+        <div className="relative w-20 h-20">
+           <Loader2 size={80} className="animate-spin text-[#E6A94A]/20" />
+           <div className="absolute inset-0 flex items-center justify-center text-[#E6A94A] font-black text-xl animate-pulse">P</div>
+        </div>
+        <p className="text-[#F5F3EE]/30 font-bold uppercase tracking-[6px] text-[10px]">Loading Production Details</p>
       </div>
     );
   }
 
   if (isError || !movie) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-white/50">Movie not found.</p>
-        <Link href="/" className="text-amber-400 hover:underline">← Back to search</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 bg-[#0F1117]">
+        <p className="text-[#F5F3EE]/40 text-xl font-medium italic">Production not found.</p>
+        <Link href="/" className="px-8 py-3 bg-[#E6A94A] text-[#0F1117] font-black rounded-2xl hover:brightness-110 transition-all">
+          Return Home
+        </Link>
       </div>
     );
   }
@@ -113,126 +124,162 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
   const inWatchlist = watchlist.includes(movie.title);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative bg-[#0F1117]">
       {showTrailer && trailerUrl && (
         <TrailerModal title={movie.title} trailerUrl={trailerUrl} onClose={() => setShowTrailer(false)} />
       )}
 
-      {/* Back nav */}
-      <div className="px-4 sm:px-8 pt-4 sm:pt-6">
-        <Link href="/" className="inline-flex items-center gap-2 text-white/40 hover:text-amber-400 transition-colors text-sm">
-          <ArrowLeft size={16} /> Back to search
-        </Link>
+      {/* Cinematic Hero Background */}
+      <div className="absolute top-0 left-0 right-0 h-[70vh] pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#E6A94A]/[0.08] via-transparent to-transparent" />
+        <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[80%] rounded-full bg-[#E6A94A]/[0.02] blur-[150px]" />
       </div>
 
-      {/* Hero */}
-      <div className="px-4 sm:px-8 py-6 sm:py-8 flex flex-col sm:flex-row gap-6 sm:gap-8">
-        {/* Poster */}
-        <div className="relative w-40 sm:w-56 shrink-0 aspect-[2/3] rounded-2xl overflow-hidden bg-white/5 shadow-2xl mx-auto sm:mx-0">
-          {movie.poster ? (
-            <Image src={movie.poster} alt={movie.title} fill className="object-cover" sizes="(max-width: 640px) 160px, 224px" priority />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-5xl text-white/20">🎬</div>
-          )}
-        </div>
+      <div className="relative z-10 max-w-screen-2xl mx-auto w-full px-6 sm:px-10">
+        {/* Navigation */}
+        <nav className="py-8">
+          <Link href="/" className="inline-flex items-center gap-3 text-[#F5F3EE]/30 hover:text-[#E6A94A] transition-colors font-bold text-sm uppercase tracking-widest group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to Discovery
+          </Link>
+        </nav>
 
-        {/* Details */}
-        <div className="flex-1 min-w-0 space-y-4">
-          <h1 className="text-2xl sm:text-4xl font-black text-white leading-tight text-center sm:text-left">{movie.title}</h1>
-
-          {/* Genres — clickable, link back to home with filter */}
-          {movie.genres?.length > 0 && (
-            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-              {movie.genres.map((g) => (
-                <Link
-                  key={g}
-                  href={`/?genre=${encodeURIComponent(g)}`}
-                  className="px-3 py-1 rounded-full text-sm bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/25 transition-colors"
-                >
-                  {g}
-                </Link>
-              ))}
-            </div>
-          )}
-
-          {/* Stats */}
-          <div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-start">
-            {movie.vote_average > 0 && (
-              <div className="flex items-center gap-2">
-                <Star size={18} className="text-amber-400" fill="currentColor" />
-                <span className="text-xl sm:text-2xl font-bold text-amber-400">{movie.vote_average.toFixed(1)}</span>
-                <span className="text-white/40 text-sm">/ 10 ({movie.vote_count?.toLocaleString()} votes)</span>
+        {/* Hero Section */}
+        <div className="flex flex-col md:flex-row gap-12 sm:gap-20 items-center md:items-start pt-4 sm:pt-10">
+          {/* Poster with shadow layer */}
+          <div className="relative w-48 sm:w-60 md:w-72 shrink-0 aspect-[2/3] rounded-[32px] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] ring-1 ring-white/10">
+            {movie.poster ? (
+              <Image src={movie.poster} alt={movie.title} fill className="object-cover" sizes="(max-width: 768px) 192px, 288px" priority />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#1A1C26]">
+                <Film size={64} className="text-white/5" />
               </div>
             )}
-            {movie.year > 0 && (
-              <div className="flex items-center gap-2 text-white/60"><Calendar size={16} /> {movie.year}</div>
-            )}
-            {movie.runtime && (
-              <div className="flex items-center gap-2 text-white/60"><Clock size={16} /> {movie.runtime} min</div>
-            )}
-            {movie.original_language && (
-              <div className="flex items-center gap-2 text-white/60"><Globe size={16} /> {movie.original_language.toUpperCase()}</div>
-            )}
           </div>
 
-          {/* Overview */}
-          {movie.overview && (
-            <p className="text-white/60 leading-relaxed max-w-2xl text-center sm:text-left">{movie.overview}</p>
-          )}
+          {/* Details Content */}
+          <div className="flex-1 min-w-0 space-y-8 text-center md:text-left">
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-7xl font-black text-[#F5F3EE] leading-none tracking-tighter">{movie.title}</h1>
+              
+              {/* Metadata Badges */}
+              {movie.genres?.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                  {movie.genres.map((g) => (
+                    <Link
+                      key={g}
+                      href={`/?genre=${encodeURIComponent(g)}`}
+                      className="px-5 py-2 rounded-full text-xs font-bold bg-[#E6A94A]/10 text-[#E6A94A] border border-[#E6A94A]/20 hover:bg-[#E6A94A]/20 transition-all uppercase tracking-widest"
+                    >
+                      {g}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-            <button
-              onClick={() => toggleWatchlist(movie.title)}
-              className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                inWatchlist
-                  ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-                  : "bg-white/5 text-white/70 border border-white/15 hover:bg-white/10"
-              }`}
-            >
-              {inWatchlist ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
-              {inWatchlist ? "Saved" : "Add to Watchlist"}
-            </button>
+            {/* Performance Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 py-8 border-y border-[#2A2E3A]/40">
+              <div className="space-y-1">
+                 <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-[3px]">Critics</span>
+                 <div className="flex items-center justify-center md:justify-start gap-2">
+                   <Star size={20} className="text-[#E6A94A]" fill="currentColor" />
+                   <span className="text-2xl font-black text-[#F5F3EE]">{movie.vote_average.toFixed(1)}</span>
+                 </div>
+              </div>
+              <div className="space-y-1">
+                 <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-[3px]">Release</span>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-xl font-bold text-[#F5F3EE]/80">
+                   <Calendar size={18} className="text-[#E6A94A]/40" /> {movie.year}
+                 </div>
+              </div>
+              <div className="space-y-1">
+                 <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-[3px]">Duration</span>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-xl font-bold text-[#F5F3EE]/80">
+                   <Clock size={18} className="text-[#E6A94A]/40" /> {movie.runtime}m
+                 </div>
+              </div>
+              <div className="space-y-1">
+                 <span className="text-[10px] font-bold text-[#F5F3EE]/30 uppercase tracking-[3px]">Language</span>
+                 <div className="flex items-center justify-center md:justify-start gap-2 text-xl font-bold text-[#F5F3EE]/80 uppercase">
+                   <Globe size={18} className="text-[#E6A94A]/40" /> {movie.original_language}
+                 </div>
+              </div>
+            </div>
 
-            <button
-              onClick={openTrailer}
-              disabled={trailerLoading}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-red-500/15 text-red-400 border border-red-500/25 hover:bg-red-500/25 transition-all disabled:opacity-50"
-            >
-              {trailerLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
-              Watch Trailer
-            </button>
+            {/* Overview */}
+            {movie.overview && (
+              <div className="space-y-4">
+                 <h3 className="text-[#E6A94A] font-black text-sm uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
+                   <Info size={14} /> Synopsis
+                 </h3>
+                 <p className="text-[#F5F3EE]/60 text-lg sm:text-2xl font-medium italic leading-relaxed max-w-4xl">
+                   "{movie.overview}"
+                 </p>
+              </div>
+            )}
 
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm bg-white/5 text-white/70 border border-white/15 hover:bg-white/10 transition-all"
-            >
-              <Share2 size={16} />
-              Share
-            </button>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start pt-6">
+              <button
+                onClick={openTrailer}
+                disabled={trailerLoading}
+                className="inline-flex items-center gap-3 px-10 py-4.5 rounded-[24px] font-black text-lg bg-[#E6A94A] text-[#0F1117] shadow-[0_15px_40px_rgba(230,169,74,0.3)] hover:brightness-110 active:scale-95 transition-all group"
+              >
+                {trailerLoading ? <Loader2 size={22} className="animate-spin" /> : <Play size={22} className="fill-current" />}
+                Watch Presentation
+              </button>
+
+              <button
+                onClick={() => toggleWatchlist(movie.title)}
+                className={`inline-flex items-center gap-3 px-8 py-4.5 rounded-[24px] font-bold text-base transition-all border border-[#2A2E3A] ${
+                  inWatchlist
+                    ? "bg-[#E6A94A]/10 text-[#E6A94A] border-[#E6A94A]/40"
+                    : "bg-white/5 text-[#F5F3EE]/60 hover:bg-white/10 hover:text-[#F5F3EE]"
+                }`}
+              >
+                {inWatchlist ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+                {inWatchlist ? "Saved to list" : "Add to list"}
+              </button>
+
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center justify-center w-[60px] h-[60px] rounded-[24px] bg-white/5 text-[#F5F3EE]/40 border border-[#2A2E3A] hover:bg-white/10 hover:text-[#F5F3EE] transition-all"
+              >
+                <Share2 size={20} />
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Similar Productions Section */}
+        {recsData?.recommendations && recsData.recommendations.length > 0 && (
+          <div className="mt-40 pb-20">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="w-2 h-10 rounded-full bg-[#E6A94A]" />
+              <div className="space-y-1">
+                <h2 className="text-3xl sm:text-5xl font-black text-[#F5F3EE] tracking-tight">Similar Productions</h2>
+                <p className="text-[#F5F3EE]/30 font-bold uppercase text-[10px] tracking-[4px]">Curated based on cinematic profile</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 sm:gap-10">
+              {recsData.recommendations.map((m) => (
+                <MovieCard
+                  key={m.title}
+                  movie={m}
+                  watchlist={watchlist}
+                  onWatchlistToggle={toggleWatchlist}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-
-      {/* Similar Movies */}
-      {recsData?.recommendations && recsData.recommendations.length > 0 && (
-        <div className="px-4 sm:px-8 pb-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-7 rounded-full bg-amber-400" />
-            <h2 className="text-xl font-bold text-amber-400">Similar Movies</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
-            {recsData.recommendations.map((m) => (
-              <MovieCard
-                key={m.title}
-                movie={m}
-                watchlist={watchlist}
-                onWatchlistToggle={toggleWatchlist}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      
+      {/* Footer (Simplified) */}
+      <footer className="py-12 border-t border-[#2A2E3A]/30 mt-20 text-center">
+         <p className="text-[#F5F3EE]/10 text-[10px] font-bold uppercase tracking-[4px]">PopcornS Cinematic Engine · 2024</p>
+      </footer>
     </div>
   );
 }
