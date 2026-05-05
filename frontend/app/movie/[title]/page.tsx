@@ -227,7 +227,7 @@ export default function MoviePage({ params }: { params: Promise<{ title: string 
                 className="inline-flex items-center gap-3 px-10 py-4.5 rounded-[24px] font-black text-lg bg-[#E6A94A] text-[#0F1117] shadow-[0_15px_40px_rgba(230,169,74,0.3)] hover:brightness-110 active:scale-95 transition-all group"
               >
                 {trailerLoading ? <Loader2 size={22} className="animate-spin" /> : <Play size={22} className="fill-current" />}
-                Watch Presentation
+                Watch Trailer
               </button>
 
               <button
