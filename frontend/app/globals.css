@@ -10,6 +10,11 @@
   --text: #F5F3EE;
   --text-muted: rgba(245, 243, 238, 0.4);
   --transition: all 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+html {
+  background-color: var(--bg-top);
 }
 
 body {
@@ -21,6 +26,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Global Vignette */
@@ -43,6 +49,7 @@ body::before {
   background: linear-gradient(135deg, #E6A94A, #F5F3EE, #E6A94A);
   background-size: 200% auto;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: shine 8s linear infinite;
 }
